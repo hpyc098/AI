@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>后台管理</title>
+<style>
+body{font-family:Arial; max-width:900px; margin:20px auto;}
+input,textarea,button{padding:5px; margin:5px 0; width:100%;}
+button{width:auto; cursor:pointer;}
+#results div{margin-bottom:10px; padding:5px; border-bottom:1px solid #ccc;}
+</style>
+</head>
+<body>
+<h2>后台管理</h2>
+
+<h3>自动网页内容</h3>
+<input type="text" id="pageUrl" placeholder="输入网页URL">
+<input type="password" id="adminPassword" placeholder="输入后台密码">
+<button onclick="fetchPage()">加入知识库</button>
+<div id="pageResult" style="white-space:pre-wrap; margin-top:10px;"></div>
+
+<h3>手动教学</h3>
+<input type="text" id="teachQuestion" placeholder="问题">
+<textarea id="teachAnswer" placeholder="答案"></textarea>
+<input type="password" id="teachPassword" placeholder="输入后台密码">
+<button onclick="teachKB()">学习问题</button>
+<div id="teachResult"></div>
+
+<script>
+async function fetchPage() {
+    const url = document.getElementById("pageUrl").value.trim();
+    const password = document.getElementById("adminPassword").value.trim();
+    if (!url || !password) { alert("请填写URL和密码"); return; }
+    try {
+        const resp = await fetch("/api/admin", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({action:"fetch_page", url, password})
+        });
+        const data = await resp.json();
+        document.getElementById("pageResult").innerText = data.reply;
+    } catch(err) {
+        document.getElementById("pageResult").innerText = "❌ 请求失败: "+err;
+    }
+}
+
+async function teachKB() {
+    const question = document.getElementById("teachQuestion").value.trim();
+    const answer = document.getElementById("teachAnswer").value.trim();
+    const password = document.getElementById("teachPassword").value.trim();
+    if (!question || !answer || !password) { alert("请填写完整"); return; }
+    try {
+        const resp = await fetch("/api/admin", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({action:"teach", question, answer, password})
+        });
+        const data = await resp.json();
+        document.getElementById("teachResult").innerText = data.reply;
+    } catch(err) {
+        document.getElementById("teachResult").innerText = "❌ 请求失败: "+err;
+    }
+}
+</script>
+</body>
+</html>
